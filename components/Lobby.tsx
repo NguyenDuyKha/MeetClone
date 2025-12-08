@@ -25,30 +25,30 @@ export const Lobby: React.FC<Props> = ({ onJoin }) => {
       <div className="max-w-4xl w-full flex flex-col md:flex-row items-center gap-12">
         
         {/* Left Side: Hero */}
-        <div className="flex-1 text-center md:text-left space-y-8 w-full">
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-8 w-full">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-tight">
             Premium video meetings. Now free for everyone.
           </h1>
-          <p className="text-xl text-gray-400 font-light">
+          <p className="text-xl text-gray-400 font-light max-w-lg">
             We re-engineered the service we built for secure business meetings, Google Meet, to make it free and available for all.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center md:justify-start">
             <button
               onClick={handleCreate}
-              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-lg font-medium text-lg transition-colors shadow-lg hover:shadow-blue-500/20 whitespace-nowrap"
+              className="h-12 flex gap-2 items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg font-medium text-base transition-colors shadow-lg hover:shadow-blue-500/20 whitespace-nowrap w-full sm:w-auto"
             >
               <Video size={20} />
               New meeting
             </button>
             
-            <form onSubmit={handleJoin} className="flex-1 sm:flex-none relative flex items-center gap-2">
+            <form onSubmit={handleJoin} className="flex items-center gap-2 w-full sm:w-auto justify-center mb-0">
               <div className="relative flex-1 sm:w-64">
                 <Keyboard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
                 <input
                   type="text"
                   placeholder="Enter a code or link"
-                  className="w-full pl-10 pr-4 py-3.5 rounded-lg border border-gray-500 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="h-12 w-full pl-10 pr-4 rounded-lg border border-gray-500 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   value={roomId}
                   onChange={(e) => setRoomId(e.target.value)}
                 />
@@ -56,17 +56,11 @@ export const Lobby: React.FC<Props> = ({ onJoin }) => {
               <button 
                 type="submit" 
                 disabled={!roomId}
-                className={`px-4 text-blue-400 hover:text-blue-300 font-medium transition-all ${!roomId ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
+                className={`h-12 px-4 text-blue-400 hover:text-blue-300 font-medium transition-all ${!roomId ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
               >
                 Join
               </button>
             </form>
-          </div>
-          
-          <div className="pt-8 border-t border-gray-700/50">
-             <p className="text-gray-500 text-sm">
-                <span className="text-blue-400 hover:underline cursor-pointer">Learn more</span> about Google Meet
-             </p>
           </div>
         </div>
 
