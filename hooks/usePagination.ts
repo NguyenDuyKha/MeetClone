@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Participant } from '../types';
+import { Participant } from '../utils/types';
 
 const MAX_TILES_PER_PAGE = 16;
 const SIDEBAR_PAGE_SIZE = 4;

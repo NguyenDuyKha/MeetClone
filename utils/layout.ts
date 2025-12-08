@@ -1,4 +1,4 @@
-import { GridLayout } from '../types';
+import { GridLayout } from './types';
 
 /**
  * Calculates the optimal grid dimensions to maximize tile area while maintaining aspect ratio.

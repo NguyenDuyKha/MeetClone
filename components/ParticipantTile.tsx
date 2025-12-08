@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Participant } from '../types';
+import { Participant } from '../utils/types';
 import { MicOff, Pin, PinOff, MoreVertical, Monitor } from 'lucide-react';
 
 interface Props {

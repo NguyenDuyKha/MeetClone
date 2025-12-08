@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Participant } from '../types';
+import { Participant } from '../utils/types';
 
 const MOCK_NAMES = [
   "Alice Johnson", "Bob Smith", "Charlie Davis", "Dana Lee", "Evan Wright",

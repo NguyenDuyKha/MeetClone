@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { Participant } from '../types';
+import { Participant } from '../utils/types';
 import { ParticipantTile } from './ParticipantTile';
 import { computeOptimalLayout } from '../utils/layout';
 
