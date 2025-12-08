@@ -1,0 +1,9 @@
+{
+  "name": "MeetClone - Adaptive Video Conferencing",
+  "description": "A Google Meet-style video conferencing application featuring smart adaptive layouts, screen sharing auto-pin, participant pagination, and responsive mobile warnings.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "display-capture"
+  ]
+}
