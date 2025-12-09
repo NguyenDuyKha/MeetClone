@@ -85,7 +85,7 @@ export const ParticipantTile: React.FC<Props> = ({
       </div>
 
       {/* Hover Controls (Top Right) */}
-      <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute rounded-full top-2 right-2 lg:top-3 lg:right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <button
           onClick={(e) => { e.stopPropagation(); onPinToggle(participant.id); }}
           className={`p-2 rounded-full backdrop-blur-md transition-colors ${isPinned ? 'bg-blue-600 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
@@ -93,11 +93,11 @@ export const ParticipantTile: React.FC<Props> = ({
         >
           {isPinned ? <PinOff size={16} /> : <Pin size={16} />}
         </button>
-        {!participant.isLocal && (
+        {/* !participant.isLocal && (
             <button className="p-2 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
                 <MoreVertical size={16} />
             </button>
-        )}
+        ) */}
       </div>
 
       {/* Mic Status Indicator (Top Right - always visible if muted) */}
