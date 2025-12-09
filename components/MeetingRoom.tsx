@@ -11,6 +11,7 @@ import { PaginationControls } from './PaginationControls';
 import { SmallScreenWarning } from './SmallScreenWarning';
 import { MeetingHeader } from './MeetingHeader';
 import { PinnedView } from './PinnedView';
+import { PeopleSidebar } from './PeopleSidebar';
 import { Toast } from './Toast';
 
 interface Props {
@@ -34,6 +35,7 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
 
   // --- State ---
   const [pinnedId, setPinnedId] = useState<string | null>(null);
+  const [isPeopleOpen, setIsPeopleOpen] = useState(false);
   const prevScreenSharingId = useRef<string | null>(null);
 
   // --- Pagination Logic ---
@@ -87,31 +89,44 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
 
       <Toast message={mediaError || screenShareError} />
 
+      {/* Main Content Area */}
       <div className="flex-1 flex w-full h-full relative">
-        {pinnedId && pinnedParticipant ? (
-          <PinnedView
-            pinnedParticipant={pinnedParticipant}
-            sidebarParticipants={visibleParticipants}
-            onPinToggle={handlePinToggle}
-          />
-        ) : (
-          <VideoGrid
-            participants={visibleParticipants}
-            pinnedId={null}
-            onPinToggle={handlePinToggle}
-            currentPage={currentPage}
-          />
-        )}
-      </div>
+          {/* Video Area */}
+            <div className="flex-1 flex w-full h-full relative">
+              {pinnedId && pinnedParticipant ? (
+                <PinnedView
+                    pinnedParticipant={pinnedParticipant}
+                    sidebarParticipants={visibleParticipants}
+                    onPinToggle={handlePinToggle}
+                />
+                ) : (
+                <VideoGrid
+                    participants={visibleParticipants}
+                    pinnedId={null}
+                    onPinToggle={handlePinToggle}
+                    currentPage={currentPage}
+                />
+                )}
 
-      <PaginationControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        visible={showControls}
-        onHoverStart={clearIdleTimer}
-        onHoverEnd={resetIdleTimer}
-      />
+              <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  visible={showControls}
+                  onHoverStart={clearIdleTimer}
+                  onHoverEnd={resetIdleTimer}
+              />
+            </div>
+
+          {/* Right Sidebar */}
+          <div className={`${isPeopleOpen ? 'w-full md:w-80' : 'w-0'} transition-all duration-300 relative bg-[#202124]`}>
+             <PeopleSidebar 
+                participants={participants} 
+                isOpen={isPeopleOpen} 
+                onClose={() => setIsPeopleOpen(false)} 
+             />
+          </div>
+      </div>
 
       <ControlsBar
         isAudioEnabled={isAudioEnabled}
@@ -126,6 +141,8 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
         visible={showControls}
         onHoverStart={clearIdleTimer}
         onHoverEnd={resetIdleTimer}
+        onTogglePeople={() => setIsPeopleOpen(!isPeopleOpen)}
+        isPeopleOpen={isPeopleOpen}
       />
     </div>
   );

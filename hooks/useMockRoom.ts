@@ -74,69 +74,7 @@ export function useMockRoom(
     }
   }, [localScreenStream]);
 
-  // Simulate remote users joining
-  useEffect(() => {
-    if (!isJoined) return;
-
-    const interval = setInterval(() => {
-      if (participants.filter(p => !p.isLocal).length < 12 && Math.random() > 0.7) {
-        const id = `user-${Date.now()}`;
-        const name = MOCK_NAMES[Math.floor(Math.random() * MOCK_NAMES.length)];
-        const newPeer: Participant = {
-          id,
-          name,
-          isLocal: false,
-          hasAudio: true,
-          hasVideo: Math.random() > 0.2,
-          isScreenSharing: false,
-          isSpeaking: false,
-          avatarUrl: `https://picsum.photos/seed/${id}/200`
-        };
-        setParticipants(prev => [...prev, newPeer]);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [isJoined, participants.length]);
-
-  // Simulate speaking activity
-  useEffect(() => {
-    if (!isJoined) return;
-    const interval = setInterval(() => {
-      setParticipants(prev => prev.map(p => ({
-        ...p,
-        isSpeaking: !p.isLocal && !p.isScreenSharing && Math.random() > 0.8
-      })));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isJoined]);
-
-  // Mock Remote Screen Share Toggle
-  const simulateRemoteScreenShare = useCallback(() => {
-    const remoteUsers = participants.filter(p => !p.isLocal && !p.isScreenSharing);
-    if (remoteUsers.length === 0) return;
-
-    // Check if a remote user is already sharing
-    const currentSharer = participants.find(p => !p.isLocal && p.isScreenSharing);
-
-    if (currentSharer) {
-      // Stop sharing
-      setScreenSharingId(null);
-      setParticipants(prev => prev.map(p => 
-        p.id === currentSharer.id ? { ...p, isScreenSharing: false } : p
-      ));
-    } else {
-      // Start sharing
-      // Note: In a real app, a user might add a 2nd tile. 
-      // For mock simplicity, we just flag the existing user as sharing to trigger UI changes.
-      const sharer = remoteUsers[Math.floor(Math.random() * remoteUsers.length)];
-      setScreenSharingId(sharer.id);
-      setParticipants(prev => prev.map(p => 
-        p.id === sharer.id ? { ...p, isScreenSharing: true } : p
-      ));
-    }
-  }, [participants]);
-
+  // Manual helper to add a user for UI testing
   const addDummyParticipant = () => {
      const id = `user-added-${Date.now()}`;
      const name = MOCK_NAMES[Math.floor(Math.random() * MOCK_NAMES.length)];
@@ -144,8 +82,8 @@ export function useMockRoom(
         id,
         name,
         isLocal: false,
-        hasAudio: true,
-        hasVideo: true,
+        hasAudio: true, // Default to true for UI check
+        hasVideo: false, // Default to false (avatar) for manual add
         isScreenSharing: false,
         isSpeaking: false,
         avatarUrl: `https://picsum.photos/seed/${id}/200`
@@ -156,7 +94,6 @@ export function useMockRoom(
   return {
     participants,
     screenSharingId,
-    simulateRemoteScreenShare,
     addDummyParticipant
   };
 }
