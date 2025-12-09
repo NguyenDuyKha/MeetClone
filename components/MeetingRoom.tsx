@@ -119,7 +119,7 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
             </div>
 
           {/* Right Sidebar */}
-          <div className={`${isPeopleOpen ? 'w-full md:w-80' : 'w-0'} transition-all duration-300 relative bg-[#202124]`}>
+          <div className={`transition-all duration-300 relative bg-[#202124]`}>
              <PeopleSidebar 
                 participants={participants} 
                 isOpen={isPeopleOpen} 
