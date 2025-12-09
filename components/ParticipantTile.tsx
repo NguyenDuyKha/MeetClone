@@ -28,7 +28,7 @@ export const ParticipantTile: React.FC<Props> = ({
   }, [participant.stream, participant.isLocal]);
 
   const isScreenShare = participant.isScreenSharing;
-  const objectFitClass = isScreenShare ? 'object-contain' : 'object-cover';
+  const objectFitClass = 'object-contain';
   const bgClass = isScreenShare ? 'bg-[#18191b]' : 'bg-gray-900';
   
   // Flip local camera but NOT local screen share

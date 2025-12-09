@@ -28,7 +28,7 @@ export const PinnedView: React.FC<Props> = ({
 
          {/* Mobile Filmstrip Overlay (Visible only on small screens when pinned) */}
          {sidebarParticipants.length > 0 && (
-           <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-2 px-2 md:hidden z-30 pointer-events-none">
+           <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-2 px-2 lg:hidden z-30 pointer-events-none">
                {sidebarParticipants.map(p => (
                    <div key={p.id} className="h-20 w-1/4 max-w-[5rem] flex-shrink-0 rounded-lg overflow-hidden border border-gray-700 bg-gray-900 shadow-lg pointer-events-auto">
                        <ParticipantTile
@@ -46,7 +46,7 @@ export const PinnedView: React.FC<Props> = ({
       
       {/* Sidebar List - Visible on Medium screens and up (Tablet/Desktop) */}
       {sidebarParticipants.length > 0 && (
-          <div className="w-64 lg:w-80 flex flex-col gap-4 justify-center hidden md:flex">
+          <div className="w-64 lg:w-80 flex flex-col gap-4 justify-center hidden lg:flex">
               <div className="flex-1 flex flex-col gap-3 overflow-hidden justify-center relative">
                    {sidebarParticipants.map(p => (
                        <div key={p.id} className="h-40 lg:h-48 w-full flex-shrink-0">

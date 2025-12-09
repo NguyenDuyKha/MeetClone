@@ -82,7 +82,7 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
 
   // --- Render ---
   return (
-    <div className="relative w-full h-screen bg-[#202124] text-white overflow-hidden flex flex-col">
+    <div className="relative w-full h-screen bg-[#202124] text-white flex flex-col">
       <SmallScreenWarning onLeave={onLeave} />
 
       <MeetingHeader roomId={roomId} visible={showControls} />

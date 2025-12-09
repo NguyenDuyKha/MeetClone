@@ -62,7 +62,7 @@ export const PeopleSidebar: React.FC<Props> = ({ participants, isOpen, onClose }
             ) : (
                 filteredParticipants.map(participant => (
                     <div key={participant.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                        <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="flex items-center gap-3">
                             {/* Avatar */}
                             <div className="relative flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-purple-600 flex items-center justify-center text-white text-xs font-bold select-none">
                                 {participant.avatarUrl ? (
