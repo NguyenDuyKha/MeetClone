@@ -4,8 +4,8 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCqSnPxDuHd0xCjNYif267SLvQXH8Yunrg",
-  authDomain: "ndkha-webrtc.firebaseapp.com",
   databaseURL: "https://ndkha-webrtc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  authDomain: "ndkha-webrtc.firebaseapp.com",
   projectId: "ndkha-webrtc",
   storageBucket: "ndkha-webrtc.firebasestorage.app",
   messagingSenderId: "487730416478",
