@@ -10,7 +10,10 @@ const MOCK_NAMES = [
 export function useMockRoom(
   localStream: MediaStream | null, 
   isJoined: boolean,
-  localScreenStream: MediaStream | null
+  localScreenStream: MediaStream | null,
+  localName: string,
+  isAudioEnabled: boolean,
+  isVideoEnabled: boolean
 ) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [screenSharingId, setScreenSharingId] = useState<string | null>(null);
@@ -20,28 +23,36 @@ export function useMockRoom(
     if (!isJoined) return;
 
     setParticipants(prev => {
-        if (prev.some(p => p.id === 'local-user')) return prev;
+        if (prev.some(p => p.id === 'local-user')) {
+             // Update name if it changed
+             return prev.map(p => p.id === 'local-user' ? { ...p, name: localName } : p);
+        }
 
         const localParticipant: Participant = {
             id: 'local-user',
-            name: 'You',
+            name: localName || 'You',
             isLocal: true,
-            hasAudio: true,
-            hasVideo: true,
+            hasAudio: isAudioEnabled,
+            hasVideo: isVideoEnabled,
             isScreenSharing: false,
             isSpeaking: false,
             stream: localStream || undefined
         };
         return [localParticipant, ...prev];
     });
-  }, [isJoined]);
+  }, [isJoined, localName]); 
 
-  // Update local camera stream
+  // Update local camera stream and media states
   useEffect(() => {
     setParticipants(prev => prev.map(p => 
-      p.id === 'local-user' ? { ...p, stream: localStream || undefined } : p
+      p.id === 'local-user' ? { 
+          ...p, 
+          stream: localStream || undefined,
+          hasAudio: isAudioEnabled,
+          hasVideo: isVideoEnabled
+      } : p
     ));
-  }, [localStream]);
+  }, [localStream, isAudioEnabled, isVideoEnabled]);
 
   // Manage Local Screen Share Participant
   useEffect(() => {
@@ -54,7 +65,7 @@ export function useMockRoom(
             }
             const screenParticipant: Participant = {
                 id: 'local-screen',
-                name: 'You (Presentation)',
+                name: `${localName || 'You'} (Presentation)`,
                 isLocal: true,
                 hasAudio: false,
                 hasVideo: true,
@@ -72,7 +83,7 @@ export function useMockRoom(
         // Only clear ID if it was us sharing
         setScreenSharingId(prev => prev === 'local-screen' ? null : prev);
     }
-  }, [localScreenStream]);
+  }, [localScreenStream, localName]);
 
   // Manual helper to add a user for UI testing
   const addDummyParticipant = () => {

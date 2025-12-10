@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocalMedia } from '../hooks/useLocalMedia';
 import { useMockRoom } from '../hooks/useMockRoom';
 import { useIdleControls } from '../hooks/useIdleControls';
 import { useScreenShare } from '../hooks/useScreenShare';
@@ -17,11 +16,27 @@ import { Toast } from './Toast';
 interface Props {
   roomId: string;
   onLeave: () => void;
+  localStream: MediaStream | null;
+  isAudioEnabled: boolean;
+  isVideoEnabled: boolean;
+  toggleAudio: () => void;
+  toggleVideo: () => void;
+  mediaError: string | null;
+  userName: string;
 }
 
-export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
+export const MeetingRoom: React.FC<Props> = ({ 
+  roomId, 
+  onLeave,
+  localStream,
+  isAudioEnabled,
+  isVideoEnabled,
+  toggleAudio,
+  toggleVideo,
+  mediaError,
+  userName
+}) => {
   // --- Hooks ---
-  const { stream: localCameraStream, isAudioEnabled, isVideoEnabled, toggleAudio, toggleVideo, error: mediaError } = useLocalMedia();
   const { stream: screenShareStream, error: screenShareError, toggleScreenShare } = useScreenShare();
   
   // Pass separate streams to mock room to handle distinct participants (Camera vs Presentation)
@@ -29,7 +44,14 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
     participants, 
     screenSharingId, 
     addDummyParticipant 
-  } = useMockRoom(localCameraStream, true, screenShareStream);
+  } = useMockRoom(
+      localStream, 
+      true, 
+      screenShareStream, 
+      userName,
+      isAudioEnabled,
+      isVideoEnabled
+  );
 
   const { showControls, resetIdleTimer, clearIdleTimer } = useIdleControls(3000);
 
@@ -47,15 +69,6 @@ export const MeetingRoom: React.FC<Props> = ({ roomId, onLeave }) => {
   } = usePagination(participants, pinnedId);
 
   // --- Effects ---
-
-  // Sync local media state (Audio/Video mute) specifically for the camera participant
-  useEffect(() => {
-      const localUser = participants.find(p => p.id === 'local-user');
-      if (localUser) {
-        localUser.hasAudio = isAudioEnabled;
-        localUser.hasVideo = isVideoEnabled;
-      }
-  }, [participants, isAudioEnabled, isVideoEnabled]);
 
   // Auto-pin logic for screen sharing (Responsive to changes only)
   useEffect(() => {
