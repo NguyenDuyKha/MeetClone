@@ -47,7 +47,7 @@ export const PaginationControls: React.FC<Props> = ({
 
         {/* Page Indicator Bubble (Fixed at Bottom) */}
         <div 
-            className={`fixed bottom-28 left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-medium backdrop-blur-md z-30 transition-opacity duration-300 pointer-events-none ${visible ? 'opacity-100' : 'opacity-0'}`}
+            className={`fixed bottom-[6.5rem] left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-medium backdrop-blur-md z-30 transition-opacity duration-300 pointer-events-none ${visible ? 'opacity-100' : 'opacity-0'}`}
             onMouseEnter={onHoverStart}
             onMouseLeave={onHoverEnd}
         >
