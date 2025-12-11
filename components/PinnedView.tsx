@@ -30,7 +30,7 @@ export const PinnedView: React.FC<Props> = ({
          {sidebarParticipants.length > 0 && (
            <div className="absolute bottom-32 left-0 right-0 flex justify-center gap-3 px-2 lg:hidden z-30 pointer-events-none">
                {sidebarParticipants.map(p => (
-                   <div key={p.id} className="h-26 w-1/4 max-w-[5.5rem] flex-shrink-0 rounded-lg overflow-hidden border border-gray-700 bg-gray-900 shadow-xl pointer-events-auto transition-transform">
+                   <div key={p.id} className="min-h-[6.5rem] w-1/4 max-w-[5.5rem] flex-shrink-0 rounded-lg overflow-hidden border border-gray-700 bg-gray-900 shadow-xl pointer-events-auto transition-transform">
                        <ParticipantTile
                           participant={p}
                           isPinned={false}

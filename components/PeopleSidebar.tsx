@@ -65,11 +65,7 @@ export const PeopleSidebar: React.FC<Props> = ({ participants, isOpen, onClose }
                         <div className="flex items-center gap-3">
                             {/* Avatar */}
                             <div className="relative flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-purple-600 flex items-center justify-center text-white text-xs font-bold select-none">
-                                {participant.avatarUrl ? (
-                                    <img src={participant.avatarUrl} alt={participant.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    participant.name.charAt(0).toUpperCase()
-                                )}
+                                {participant.name.charAt(0).toUpperCase()}
                             </div>
                             
                             {/* Name info */}
@@ -85,17 +81,9 @@ export const PeopleSidebar: React.FC<Props> = ({ participants, isOpen, onClose }
 
                         {/* Status Icons */}
                         <div className="flex items-center gap-2">
-                            {participant.isSpeaking && (
-                                <div className="flex gap-0.5 h-3 items-end mr-1">
-                                    <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite] h-2"></div>
-                                    <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_0.2s] h-3"></div>
-                                    <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_0.4s] h-1.5"></div>
-                                </div>
-                            )}
-                            
                             {!participant.isScreenSharing && (
-                                <div className={`p-1.5 rounded-full ${participant.hasAudio ? 'text-gray-400' : 'bg-red-500/10 text-red-500'}`}>
-                                    {participant.hasAudio ? (
+                                <div className={`p-1.5 rounded-full ${participant.isAudioEnabled ? 'text-gray-400' : 'bg-red-500/10 text-red-500'}`}>
+                                    {participant.isAudioEnabled ? (
                                         <Mic size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                     ) : (
                                         <MicOff size={16} />

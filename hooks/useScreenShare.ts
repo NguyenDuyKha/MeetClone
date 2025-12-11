@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useScreenShare() {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -39,6 +39,15 @@ export function useScreenShare() {
         }
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   return { stream, error, toggleScreenShare };
 }

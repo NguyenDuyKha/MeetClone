@@ -101,8 +101,8 @@ export const PreJoinScreen: React.FC<Props> = ({
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 gap-2">
-                        <div className="bg-gray-800 p-6 rounded-full">
-                            <VideoOff size={48} />
+                        <div className="bg-gray-800 p-6 rounded-full md:block hidden">
+                            <VideoOff size={36} />
                         </div>
                         <p className="text-lg font-medium">Camera is off</p>
                     </div>

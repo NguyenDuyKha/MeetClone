@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Participant } from '../utils/types';
-import { MicOff, Pin, PinOff, MoreVertical, Monitor } from 'lucide-react';
+import { MicOff, Pin, PinOff, Monitor } from 'lucide-react';
 
 interface Props {
   participant: Participant;
@@ -27,6 +27,13 @@ export const ParticipantTile: React.FC<Props> = ({
     }
   }, [participant.stream, participant.isLocal]);
 
+  useEffect(() => {
+      // Remote stream attachment
+      if (!participant.isLocal && participant.stream && videoRef.current) {
+          videoRef.current.srcObject = participant.stream;
+      }
+  }, [participant.stream, participant.isLocal]);
+
   const isScreenShare = participant.isScreenSharing;
   const objectFitClass = 'object-contain';
   const bgClass = isScreenShare ? 'bg-[#18191b]' : 'bg-gray-900';
@@ -40,16 +47,16 @@ export const ParticipantTile: React.FC<Props> = ({
       style={{ width: width, height: height }}
     >
       {/* Content Layer */}
-      {participant.isLocal ? (
+      {(participant.stream && (participant.isVideoEnabled || isScreenShare)) ? (
         <video
           ref={videoRef}
           autoPlay
-          muted
+          muted={participant.isLocal} // Always mute local video feedback
           playsInline
           className={`w-full h-full ${objectFitClass} transform ${shouldFlip ? '-scale-x-100' : ''}`}
         />
       ) : isScreenShare ? (
-        // Remote Screen Share Placeholder (since we don't have real remote streams in mock)
+        // Fallback for screen share if stream not yet available (rare)
         <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-4 p-8">
             <Monitor size={48} className="animate-pulse" />
             <div className="text-center">
@@ -57,12 +64,6 @@ export const ParticipantTile: React.FC<Props> = ({
                 <p className="text-sm">is presenting</p>
             </div>
         </div>
-      ) : participant.hasVideo ? (
-        <img 
-          src={participant.avatarUrl} 
-          alt={participant.name}
-          className="w-full h-full object-cover"
-        />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-gray-800">
            <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold text-white uppercase select-none">
@@ -71,16 +72,11 @@ export const ParticipantTile: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Speaking Indicator Border */}
-      {participant.isSpeaking && (
-        <div className="absolute inset-0 border-4 border-blue-500 rounded-xl pointer-events-none animate-pulse" />
-      )}
-
       {/* Info Bar (Bottom Left) */}
       <div className="absolute bottom-3 left-3 flex items-center gap-2 max-w-[80%] z-10">
         <div className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-md text-white text-xs font-medium truncate flex items-center gap-2">
            {participant.name} {participant.isLocal && !isScreenShare && "(You)"}
-           {!participant.hasAudio && !isScreenShare && <MicOff size={12} className="text-red-400" />}
+           {!participant.isAudioEnabled && !isScreenShare && <MicOff size={12} className="text-red-400" />}
         </div>
       </div>
 
@@ -93,15 +89,10 @@ export const ParticipantTile: React.FC<Props> = ({
         >
           {isPinned ? <PinOff size={16} /> : <Pin size={16} />}
         </button>
-        {/* !participant.isLocal && (
-            <button className="p-2 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
-                <MoreVertical size={16} />
-            </button>
-        ) */}
       </div>
 
       {/* Mic Status Indicator (Top Right - always visible if muted) */}
-      {!participant.hasAudio && !isScreenShare && (
+      {!participant.isAudioEnabled && !isScreenShare && (
         <div className="absolute top-3 right-3 bg-red-500/90 p-1.5 rounded-full group-hover:opacity-0 transition-opacity">
           <MicOff size={14} className="text-white" />
         </div>

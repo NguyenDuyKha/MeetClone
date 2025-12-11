@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useMockRoom } from '../hooks/useMockRoom';
+import { useRoom } from '../hooks/useRoom';
 import { useIdleControls } from '../hooks/useIdleControls';
 import { useScreenShare } from '../hooks/useScreenShare';
 import { usePagination } from '../hooks/usePagination';
@@ -39,14 +39,14 @@ export const MeetingRoom: React.FC<Props> = ({
   // --- Hooks ---
   const { stream: screenShareStream, error: screenShareError, toggleScreenShare } = useScreenShare();
   
-  // Pass separate streams to mock room to handle distinct participants (Camera vs Presentation)
+  // Use Real Firebase Room Hook
   const { 
     participants, 
     screenSharingId, 
     addDummyParticipant 
-  } = useMockRoom(
+  } = useRoom(
+      roomId,
       localStream, 
-      true, 
       screenShareStream, 
       userName,
       isAudioEnabled,

@@ -1,13 +1,27 @@
-export interface Participant {
+export interface RoomInfo {
+  id: string;
+  createdAt: number;
+}
+
+export interface ParticipantData {
   id: string;
   name: string;
+  isAudioEnabled: boolean;
+  isVideoEnabled: boolean;
+  joinedAt: number;
+}
+
+export interface ScreenShareData {
+  id: string;
+  name: string;
+  isAudioEnabled: boolean;
+  createdAt: number;
+}
+
+export interface Participant extends ParticipantData {
   isLocal: boolean;
-  hasAudio: boolean;
-  hasVideo: boolean;
   isScreenSharing: boolean;
-  isSpeaking: boolean;
-  stream?: MediaStream; // For local user or real WebRTC
-  avatarUrl?: string; // For mock users
+  stream?: MediaStream;
 }
 
 export interface GridLayout {
@@ -17,9 +31,9 @@ export interface GridLayout {
   tileHeight: number;
 }
 
-export interface RoomState {
-  id: string;
-  isJoined: boolean;
-  participants: Participant[];
-  screenSharingId: string | null;
+export interface SignalData {
+  type: "offer" | "answer" | "candidate";
+  payload: any;
+  senderId: string;
+  senderName: string;
 }
