@@ -13,9 +13,85 @@ export const Lobby: React.FC<Props> = ({ onJoin }) => {
     onJoin(randomId);
   };
 
+  const isURL = (input: string) => {
+    try {
+      new URL(
+        /^[a-zA-Z]+:\/\//.test(input) ? input : `https://${input}`
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.trim();
+
+    // 1) If input looks like a URL → extract ID
+    const looksLikeURL = isURL(value);
+
+    if (looksLikeURL) {
+      try {
+        // Ensure URL always has a schema
+        const fixed = /^[a-zA-Z]+:\/\//.test(value) ? value : `https://${value}`;
+        const url = new URL(fixed);
+
+        const sameHost =
+          url.protocol === window.location.protocol &&
+          url.host === window.location.host;
+
+        if (sameHost) {
+          let id = '';
+
+          // /room/xxxxx-xxxxx (pathname)
+          if (url.pathname.includes('/room/')) {
+            id = url.pathname.split('/room/')[1] || '';
+          }
+          // #/room/xxxxx-xxxxx (hash router)
+          else if (url.hash.includes('/room/')) {
+            id = url.hash.split('/room/')[1] || '';
+          }
+          // domain/xxxxx-xxxxx (root format)
+          else if (url.pathname !== '/') {
+            id = url.pathname.slice(1);
+          }
+
+          // Cleanup ID
+          if (id) {
+            value = id.split('?')[0].split('#')[0].replace(/\/$/, '');
+          }
+        }
+      } catch {
+        // If URL parse fails, treat input as normal text
+      }
+    }
+
+    // 2) Sanitize: only a-z, 0-9, hyphen
+    value = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+
+    // 3) Auto hyphen: xxxxxxxxxx → xxxxx-xxxxx
+    // Case A: pasted 10 chars
+    if (value.length === 10 && !value.includes('-')) {
+      value = value.slice(0, 5) + '-' + value.slice(5);
+    }
+    // Case B: typing the 6th char (abcde → abcdef → abcde-f)
+    if (value.length === 6 && !value.includes('-')) {
+      value = value.slice(0, 5) + '-' + value.slice(5);
+    }
+
+    // 4) Max length
+    if (value.length > 11) {
+      value = value.slice(0, 11);
+    }
+
+    setRoomId(value);
+  };
+
+  const isValidId = /^[a-z0-9]{5}-[a-z0-9]{5}$/.test(roomId);
+
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (roomId.trim().length > 0) {
+    if (isValidId) {
       onJoin(roomId);
     }
   };
@@ -48,15 +124,15 @@ export const Lobby: React.FC<Props> = ({ onJoin }) => {
                 <input
                   type="text"
                   placeholder="Enter a code or link"
-                  className="h-12 w-full pl-10 pr-4 rounded-lg border border-gray-500 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`h-12 w-full pl-10 pr-4 rounded-lg border bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${roomId && !isValidId ? 'focus:ring-red-500' : 'border-gray-500'}`}
                   value={roomId}
-                  onChange={(e) => setRoomId(e.target.value)}
+                  onChange={handleInputChange}
                 />
               </div>
               <button 
                 type="submit" 
-                disabled={!roomId}
-                className={`h-12 px-4 text-blue-400 hover:text-blue-300 font-medium transition-all ${!roomId ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
+                disabled={!isValidId}
+                className={`h-12 px-4 font-medium transition-all ${!isValidId ? 'text-gray-500 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'}`}
               >
                 Join
               </button>
