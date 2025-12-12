@@ -57,23 +57,58 @@ export function useRoom(
     signInAnonymously(auth).catch(console.error);
   }, []);
 
-  // --- 2. Track Management (Renegotiation substitution) ---
+  // --- 2. Track Management (Sync local stream changes to PeerConnections) ---
   useEffect(() => {
-    // When local stream changes (e.g. mute/unmute video tracks), update senders
+    // When local stream changes (e.g. video toggled off/on), update all peer connections
     Object.entries(pcsRef.current).forEach(([key, pc]) => {
-        // Only update camera connections (not viewer/screen ones)
+        // We only manage standard camera/mic connections here, not screen share/viewers
         if (!key.includes('_screen') && !key.includes('_viewer')) {
-            const senders = pc.getSenders();
-            localStream?.getTracks().forEach(track => {
-                const sender = senders.find(s => s.track?.kind === track.kind);
-                if (sender) {
-                    sender.replaceTrack(track).catch(e => console.warn("Track replace failed", e));
-                } else {
-                    if (pc.signalingState === 'stable') {
-                       pc.addTrack(track, localStream);
+            const transceivers = pc.getTransceivers();
+            const newAudioTrack = localStream?.getAudioTracks()[0];
+            const newVideoTrack = localStream?.getVideoTracks()[0];
+
+            transceivers.forEach(transceiver => {
+                const sender = transceiver.sender;
+                // Identify the type of media this transceiver handles based on the receiver's track kind
+                // This is stable even if the sender track is currently null
+                const kind = transceiver.receiver.track.kind;
+
+                if (kind === 'audio') {
+                    if (newAudioTrack) {
+                        if (sender.track?.id !== newAudioTrack.id) {
+                            sender.replaceTrack(newAudioTrack).catch(e => console.error("Audio replace failed", e));
+                        }
+                    } 
+                }
+
+                if (kind === 'video') {
+                    if (newVideoTrack) {
+                        // Video is enabled (or re-enabled)
+                        if (sender.track?.id !== newVideoTrack.id) {
+                            console.log("Replacing video track with new one");
+                            sender.replaceTrack(newVideoTrack).catch(e => console.error("Video replace failed", e));
+                        }
+                    } else {
+                        // Video is disabled (track removed from stream)
+                        // Explicitly set sender track to null to ensure clean state
+                        if (sender.track !== null) {
+                            console.log("Setting video sender to null (Video Off)");
+                            sender.replaceTrack(null).catch(e => console.error("Video disable failed", e));
+                        }
                     }
                 }
             });
+            
+            // Check if we need to ADD tracks (e.g. if we started without video but added it later)
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    const hasTransceiver = transceivers.some(t => t.receiver.track.kind === track.kind);
+                    if (!hasTransceiver && pc.signalingState === 'stable') {
+                        console.log("Adding new track to PC:", track.kind);
+                        pc.addTrack(track, localStream);
+                    }
+                });
+            }
         }
     });
   }, [localStream]);
@@ -235,7 +270,7 @@ export function useRoom(
       });
 
       setParticipants(all);
-  }, [userId, isAudioEnabled, isVideoEnabled]); 
+  }, [userId, isAudioEnabled, isVideoEnabled, localStream, screenStream]); 
 
   // Update UI when media flags change
   useEffect(() => { recalculateParticipants(); }, [recalculateParticipants]);
@@ -380,11 +415,22 @@ export function useRoom(
           participantsDataRef.current = data;
           
           Object.keys(pcsRef.current).forEach(key => {
-               if (!key.includes('_screen') && !key.includes('_viewer') && !data[key]) {
+                if (!key.includes('_screen') && !key.includes('_viewer') && !data[key]) {
                    pcsRef.current[key]?.close();
                    delete pcsRef.current[key];
                    delete streamsRef.current[key];
+                }
+                // Viewer connections (I am sharing my screen TO this participant)
+               else if (key.endsWith('_viewer')) {
+                   const viewerId = key.replace('_viewer', '');
+                   if (!data[viewerId]) {
+                       console.log(`[WebRTC] Cleanup Viewer: ${key}`);
+                       pcsRef.current[key]?.close();
+                       delete pcsRef.current[key];
+                       // No stream ref for viewers (outgoing only)
+                   }
                }
+
           });
 
           Object.values(data).forEach((p: any) => {
@@ -415,7 +461,20 @@ export function useRoom(
       const unsubScreens = onValue(child(ref(db), `${roomBase}/screens`), (snap) => {
           const data = snap.val() || {};
           screensDataRef.current = data;
-          
+ 
+          // Cleanup watcher connections (I am watching THIS screen)
+          Object.keys(pcsRef.current).forEach(key => {
+             if (key.endsWith('_screen')) {
+                 const ownerId = key.replace('_screen', '');
+                 if (!data[ownerId]) {
+                     console.log(`[WebRTC] Cleanup Screen Watcher: ${key}`);
+                     pcsRef.current[key]?.close();
+                     delete pcsRef.current[key];
+                     delete streamsRef.current[key];
+                 }
+             }
+          });
+
           Object.values(data).forEach((s: any) => {
                if (s.id === userId) return;
                
