@@ -75,40 +75,36 @@ export function useLocalMedia(): LocalMediaState {
     if (!stream) return;
 
     if (isVideoEnabled) {
-      // Turn Video OFF (Mute)
-      const videoTrack = stream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = false;
-        // We do NOT stop() the track or remove it from the stream.
-        // Stopping the track would end it on the receiver side, requiring renegotiation.
-        // Disabling it sends black frames (or silence) but keeps the connection alive.
-      }
+      // Turn Video OFF
+      // 1. Stop the video track to ensure the camera hardware/light turns off
+      const videoTracks = stream.getVideoTracks();
+      videoTracks.forEach(track => track.stop());
+
+      // 2. Create a new MediaStream with ONLY the existing audio tracks
+      // This preserves the microphone session without interruption
+      const audioTracks = stream.getAudioTracks();
+      const newStream = new MediaStream(audioTracks);
+      
+      setStream(newStream);
       setIsVideoEnabled(false);
     } else {
       // Turn Video ON
-      const videoTrack = stream.getVideoTracks()[0];
-      if (videoTrack) {
-        // Track exists, just unmute
-        videoTrack.enabled = true;
+      try {
+        // 1. Request a new video track
+        const videoStream = await navigator.mediaDevices.getUserMedia({
+            video: VIDEO_CONSTRAINTS
+        });
+        const newVideoTrack = videoStream.getVideoTracks()[0];
+        
+        // 2. Re-combine existing audio tracks with the new video track
+        const audioTracks = stream.getAudioTracks();
+        const newStream = new MediaStream([...audioTracks, newVideoTrack]);
+        
+        setStream(newStream);
         setIsVideoEnabled(true);
-      } else {
-        // Track missing (e.g. initial permission denied), try to acquire
-        try {
-            const videoStream = await navigator.mediaDevices.getUserMedia({
-                video: VIDEO_CONSTRAINTS
-            });
-            const newVideoTrack = videoStream.getVideoTracks()[0];
-            
-            // Re-combine audio and video
-            const audioTracks = stream.getAudioTracks();
-            const newStream = new MediaStream([...audioTracks, newVideoTrack]);
-            
-            setStream(newStream);
-            setIsVideoEnabled(true);
-        } catch (err) {
-            console.error("Error restarting video:", err);
-            setError("Could not restart camera.");
-        }
+      } catch (err) {
+        console.error("Error restarting video:", err);
+        setError("Could not restart camera.");
       }
     }
   }, [stream, isVideoEnabled]);
