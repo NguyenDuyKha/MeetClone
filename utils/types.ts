@@ -31,9 +31,26 @@ export interface GridLayout {
   tileHeight: number;
 }
 
+export type SignalType = "offer" | "answer" | "candidate";
+
+export interface SignalPayload {
+  type?: RTCSdpType;
+  sdp?: string;
+  [key: string]: any; // For candidate object properties
+}
+
 export interface SignalData {
-  type: "offer" | "answer" | "candidate";
-  payload: any;
+  type: SignalType;
+  payload: SignalPayload | RTCIceCandidateInit;
   senderId: string;
   senderName: string;
+}
+
+export interface LocalMediaState {
+  stream: MediaStream | null;
+  isAudioEnabled: boolean;
+  isVideoEnabled: boolean;
+  error: string | null;
+  toggleAudio: () => void;
+  toggleVideo: () => void;
 }

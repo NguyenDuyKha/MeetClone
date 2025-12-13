@@ -1,37 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Mic, MicOff, Video, VideoOff, HatGlasses, ArrowLeft } from 'lucide-react';
+import { useMediaContext } from '../contexts/MediaContext';
+import { useVideoRef } from '../hooks/useVideoRef';
 
 interface Props {
   roomId: string;
   onJoin: (name: string) => void;
   onCancel: () => void;
-  stream: MediaStream | null;
-  isAudioEnabled: boolean;
-  isVideoEnabled: boolean;
-  onToggleAudio: () => void;
-  onToggleVideo: () => void;
 }
 
 export const PreJoinScreen: React.FC<Props> = ({
   roomId,
   onJoin,
   onCancel,
-  stream,
-  isAudioEnabled,
-  isVideoEnabled,
-  onToggleAudio,
-  onToggleVideo
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { stream, isAudioEnabled, isVideoEnabled, toggleAudio, toggleVideo } = useMediaContext();
+  const videoRef = useVideoRef(stream);
   const [displayName, setDisplayName] = useState('');
   const [audioLevel, setAudioLevel] = useState(0);
-
-  // Attach stream to video element
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream, isVideoEnabled]);
 
   // Audio Level Visualizer
   useEffect(() => {
@@ -57,14 +43,14 @@ export const PreJoinScreen: React.FC<Props> = ({
       analyser.getByteFrequencyData(array);
       const arraySum = array.reduce((a, value) => a + value, 0);
       const average = arraySum / array.length;
-      setAudioLevel(Math.min(100, Math.max(0, average * 2))); // Scale for better visibility
+      setAudioLevel(Math.min(100, Math.max(0, average * 2)));
     };
 
     return () => {
-      if (scriptProcessor) scriptProcessor.disconnect();
-      if (analyser) analyser.disconnect();
-      if (microphone) microphone.disconnect();
-      if (audioContext) audioContext.close();
+      scriptProcessor.disconnect();
+      analyser.disconnect();
+      microphone.disconnect();
+      audioContext.close();
     };
   }, [stream, isAudioEnabled]);
 
@@ -77,7 +63,6 @@ export const PreJoinScreen: React.FC<Props> = ({
 
   return (
     <div className="min-h-screen bg-[#202124] text-white flex flex-col items-center justify-center p-4 md:p-8">
-        
       {/* Header */}
       <div className="absolute top-6 left-6 flex items-center gap-2 text-xl font-medium text-gray-300">
          <button onClick={onCancel} className="hover:bg-gray-800 p-2 rounded-full transition-colors">
@@ -108,7 +93,7 @@ export const PreJoinScreen: React.FC<Props> = ({
                     </div>
                 )}
 
-                {/* Audio Meter (Top Right) */}
+                {/* Audio Meter */}
                 <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/10">
                      <div className="w-2 h-2 rounded-full bg-blue-500" style={{ opacity: isAudioEnabled ? 1 : 0.3 }}></div>
                      <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
@@ -119,16 +104,16 @@ export const PreJoinScreen: React.FC<Props> = ({
                      </div>
                 </div>
 
-                {/* Controls Overlay (Bottom Center) */}
+                {/* Controls */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4">
                     <button
-                        onClick={onToggleAudio}
+                        onClick={toggleAudio}
                         className={`p-4 rounded-full transition-all duration-200 shadow-lg border border-white/10 ${isAudioEnabled ? 'bg-gray-700/90 hover:bg-gray-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`}
                     >
                         {isAudioEnabled ? <Mic size={24} /> : <MicOff size={24} />}
                     </button>
                     <button
-                        onClick={onToggleVideo}
+                        onClick={toggleVideo}
                         className={`p-4 rounded-full transition-all duration-200 shadow-lg border border-white/10 ${isVideoEnabled ? 'bg-gray-700/90 hover:bg-gray-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`}
                     >
                         {isVideoEnabled ? <Video size={24} /> : <VideoOff size={24} />}
@@ -136,7 +121,6 @@ export const PreJoinScreen: React.FC<Props> = ({
                 </div>
              </div>
              
-             {/* Device Info */}
              <div className="text-center text-sm text-gray-400">
                 {stream ? "Camera and microphone connected" : "Checking devices..."}
              </div>
@@ -149,7 +133,6 @@ export const PreJoinScreen: React.FC<Props> = ({
                 <p className="text-gray-400 text-sm">Room ID: <span className="font-mono text-blue-400">{roomId}</span></p>
             </div>
 
-            {/* Avatar Preview (Mock) */}
              <div className="w-20 h-20 rounded-full bg-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-lg mx-auto lg:mx-0">
                  {displayName ? displayName.charAt(0).toUpperCase() : <HatGlasses size={32} />}
              </div>
@@ -166,27 +149,19 @@ export const PreJoinScreen: React.FC<Props> = ({
                     />
                  </div>
 
-                 <div className="flex gap-3">
-                     <button
-                        type="submit"
-                        disabled={!displayName.trim()}
-                        className={`flex-1 py-3 px-6 rounded-full font-medium text-sm transition-all shadow-lg ${
-                            displayName.trim() 
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/30' 
-                            : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                        }`}
-                     >
-                        Join now
-                     </button>
-                 </div>
+                 <button
+                    type="submit"
+                    disabled={!displayName.trim()}
+                    className={`w-full py-3 px-6 rounded-full font-medium text-sm transition-all shadow-lg ${
+                        displayName.trim() 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/30' 
+                        : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    }`}
+                 >
+                    Join now
+                 </button>
             </form>
-            
-            {/* Disclaimer */}
-            <p className="text-xs text-gray-500">
-                Other participants will be able to hear you once you join.
-            </p>
         </div>
-
       </div>
     </div>
   );

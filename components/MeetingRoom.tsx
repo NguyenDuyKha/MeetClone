@@ -3,6 +3,7 @@ import { useRoom } from '../hooks/useRoom';
 import { useIdleControls } from '../hooks/useIdleControls';
 import { useScreenShare } from '../hooks/useScreenShare';
 import { usePagination } from '../hooks/usePagination';
+import { useMediaContext } from '../contexts/MediaContext';
 
 import { VideoGrid } from './VideoGrid';
 import { ControlsBar } from './ControlsBar';
@@ -16,11 +17,6 @@ import { Toast } from './Toast';
 interface Props {
   roomId: string;
   onLeave: () => void;
-  localStream: MediaStream | null;
-  isAudioEnabled: boolean;
-  isVideoEnabled: boolean;
-  toggleAudio: () => void;
-  toggleVideo: () => void;
   mediaError: string | null;
   userName: string;
 }
@@ -28,18 +24,22 @@ interface Props {
 export const MeetingRoom: React.FC<Props> = ({ 
   roomId, 
   onLeave,
-  localStream,
-  isAudioEnabled,
-  isVideoEnabled,
-  toggleAudio,
-  toggleVideo,
   mediaError,
   userName
 }) => {
-  // --- Hooks ---
+  // Global Media State
+  const { 
+    stream: localStream, 
+    isAudioEnabled, 
+    isVideoEnabled, 
+    toggleAudio, 
+    toggleVideo 
+  } = useMediaContext();
+
+  // Local Hooks
   const { stream: screenShareStream, error: screenShareError, toggleScreenShare } = useScreenShare();
   
-  // Use Real Firebase Room Hook
+  // Logic
   const { 
     participants, 
     screenSharingId, 
@@ -55,12 +55,12 @@ export const MeetingRoom: React.FC<Props> = ({
 
   const { showControls, resetIdleTimer, clearIdleTimer } = useIdleControls(3000);
 
-  // --- State ---
+  // UI State
   const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [isPeopleOpen, setIsPeopleOpen] = useState(false);
   const prevScreenSharingId = useRef<string | null>(null);
 
-  // --- Pagination Logic ---
+  // Pagination
   const { 
     currentPage, 
     setCurrentPage, 
@@ -68,17 +68,12 @@ export const MeetingRoom: React.FC<Props> = ({
     visibleParticipants 
   } = usePagination(participants, pinnedId);
 
-  // --- Effects ---
-
-  // Auto-pin logic for screen sharing (Responsive to changes only)
+  // Auto-pin logic
   useEffect(() => {
     if (screenSharingId !== prevScreenSharingId.current) {
         if (screenSharingId) {
-            // New screen share started -> Auto Pin
             setPinnedId(screenSharingId);
         } else {
-            // Screen share stopped
-            // If the user was pinned to the screen share that just ended, unpin them.
             const oldId = prevScreenSharingId.current;
             setPinnedId(prev => prev === oldId ? null : prev);
         }
@@ -86,14 +81,12 @@ export const MeetingRoom: React.FC<Props> = ({
     }
   }, [screenSharingId]);
 
-  // --- Handlers ---
   const handlePinToggle = (id: string) => {
     setPinnedId(prev => (prev === id ? null : id));
   };
 
   const pinnedParticipant = participants.find(p => p.id === pinnedId);
 
-  // --- Render ---
   return (
     <div className="relative w-full h-screen bg-[#202124] text-white flex flex-col">
       <SmallScreenWarning onLeave={onLeave} />

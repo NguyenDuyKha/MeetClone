@@ -3,66 +3,61 @@ import { HashRouter, Routes, Route, useNavigate, useParams } from 'react-router-
 import { Lobby } from './components/Lobby';
 import { MeetingRoom } from './components/MeetingRoom';
 import { PreJoinScreen } from './components/PreJoinScreen';
-import { useLocalMedia } from './hooks/useLocalMedia';
+import { MediaProvider, useMediaContext } from './contexts/MediaContext';
 
-const RoomWrapper = () => {
-  const { roomId } = useParams();
+const RoomWrapper: React.FC = () => {
+  const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const [hasJoined, setHasJoined] = useState(false);
   const [displayName, setDisplayName] = useState('');
 
-  // Lifted media state so it persists from PreJoin to MeetingRoom
-  const { 
-      stream, 
-      isAudioEnabled, 
-      isVideoEnabled, 
-      toggleAudio, 
-      toggleVideo, 
-      error 
-  } = useLocalMedia();
+  // Access global media state via Context
+  const { error } = useMediaContext();
 
   const handleJoin = (name: string) => {
       setDisplayName(name);
       setHasJoined(true);
   };
+
+  const currentRoomId = roomId || 'demo-room';
   
   if (!hasJoined) {
       return (
           <PreJoinScreen
-              roomId={roomId || 'demo-room'}
+              roomId={currentRoomId}
               onJoin={handleJoin}
               onCancel={() => navigate('/')}
-              stream={stream}
-              isAudioEnabled={isAudioEnabled}
-              isVideoEnabled={isVideoEnabled}
-              onToggleAudio={toggleAudio}
-              onToggleVideo={toggleVideo}
           />
       );
   }
 
   return (
     <MeetingRoom 
-        roomId={roomId || 'demo-room'} 
+        roomId={currentRoomId} 
         onLeave={() => navigate('/')}
-        localStream={stream}
-        isAudioEnabled={isAudioEnabled}
-        isVideoEnabled={isVideoEnabled}
-        toggleAudio={toggleAudio}
-        toggleVideo={toggleVideo}
         mediaError={error}
         userName={displayName}
     />
   );
 };
 
-const AppContent = () => {
+// Wrap the room logic with MediaProvider so that media is initialized only when entering this route
+// and cleaned up when leaving it (returning to Lobby).
+const RoomWithMedia: React.FC = () => {
+    return (
+        <MediaProvider>
+            <RoomWrapper />
+        </MediaProvider>
+    );
+};
+
+const AppRoutes: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <Routes>
       <Route path="/" element={<Lobby onJoin={(id) => navigate(`/room/${id}`)} />} />
-      <Route path="/room/:roomId" element={<RoomWrapper />} />
+      <Route path="/room/:roomId" element={<RoomWithMedia />} />
     </Routes>
   );
 };
@@ -70,7 +65,7 @@ const AppContent = () => {
 export default function App() {
   return (
     <HashRouter>
-      <AppContent />
+        <AppRoutes />
     </HashRouter>
   );
 }
