@@ -42,8 +42,7 @@ export const MeetingRoom: React.FC<Props> = ({
   // Logic
   const { 
     participants, 
-    screenSharingId, 
-    addDummyParticipant 
+    screenSharingId
   } = useRoom(
       roomId,
       localStream, 
@@ -142,7 +141,6 @@ export const MeetingRoom: React.FC<Props> = ({
         onToggleVideo={toggleVideo}
         onToggleScreenShare={toggleScreenShare}
         onLeave={onLeave}
-        onAddDummy={addDummyParticipant}
         participantCount={participants.length}
         visible={showControls}
         onHoverStart={clearIdleTimer}

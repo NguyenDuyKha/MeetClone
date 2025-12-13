@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff, Users, UserPlus } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff, Users } from 'lucide-react';
 
 interface Props {
   isAudioEnabled: boolean;
@@ -9,7 +9,6 @@ interface Props {
   onToggleVideo: () => void;
   onToggleScreenShare: () => void | Promise<void>;
   onLeave: () => void;
-  onAddDummy: () => void;
   participantCount: number;
   visible: boolean;
   onHoverStart: () => void;
@@ -26,7 +25,6 @@ export const ControlsBar: React.FC<Props> = ({
   onToggleVideo,
   onToggleScreenShare,
   onLeave,
-  onAddDummy,
   participantCount,
   visible,
   onHoverStart,
@@ -78,15 +76,6 @@ export const ControlsBar: React.FC<Props> = ({
                 <Users size={20} />
                 {participantCount > 0 && <span className="text-xs font-bold bg-black/20 px-1.5 rounded-full">{participantCount}</span>}
              </div>
-        </button>
-
-        {/* Keeping Add Dummy for manual testing as per user intent, but hidden on small screens */}
-        <button
-          onClick={onAddDummy}
-          className="p-4 rounded-xl bg-gray-700 hover:bg-gray-600 text-white transition-all duration-200 hidden lg:block opacity-50 hover:opacity-100"
-          title="Simulate adding user (Test)"
-        >
-            <UserPlus size={20} />
         </button>
 
         <div className="w-px h-8 bg-gray-700 mx-1"></div>

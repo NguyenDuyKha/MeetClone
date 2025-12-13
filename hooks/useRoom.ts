@@ -452,7 +452,6 @@ export function useRoom(
 
   return {
     participants,
-    screenSharingId,
-    addDummyParticipant: () => {}
+    screenSharingId
   };
 }
