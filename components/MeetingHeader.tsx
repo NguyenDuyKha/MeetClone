@@ -9,10 +9,19 @@ interface Props {
 export const MeetingHeader: React.FC<Props> = ({ roomId, visible }) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(roomId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      // Attempt to focus window if lost (common in iframes/devtools)
+      if (!document.hasFocus()) {
+        window.focus();
+      }
+      await navigator.clipboard.writeText(roomId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.warn("Clipboard write failed:", err);
+      // Fail silently or log to console to prevent app crash
+    }
   };
 
   return (
